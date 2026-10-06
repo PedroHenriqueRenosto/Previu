@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Previu · tempo real (Edge)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "deviceId": "edge",
+      "toolArgs": ["--dart-define-from-file=env/local.json"]
+    },
+    {
+      "name": "Previu · prévia do layout (Edge)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "deviceId": "edge",
+      "toolArgs": ["--dart-define=DEMO_MODE=true"]
+    }
+  ]
+}
