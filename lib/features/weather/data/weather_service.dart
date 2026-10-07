@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../domain/current_weather.dart';
+import '../domain/weather_city.dart';
 
 class WeatherException implements Exception {
   const WeatherException(this.message, {this.statusCode});
@@ -18,15 +19,17 @@ class WeatherService {
   final String apiKey;
   final http.Client _client;
 
-  Future<CurrentWeather> fetchCurrent() async {
+  Future<CurrentWeather> fetchCurrent({
+    WeatherCity city = WeatherCity.curitiba,
+  }) async {
     if (apiKey.trim().isEmpty) {
       throw const WeatherException(
         'O serviço de clima ainda não está configurado.',
       );
     }
     final uri = Uri.https('api.openweathermap.org', '/data/2.5/weather', {
-      'lat': '-25.43',
-      'lon': '-49.27',
+      'lat': city.latitude.toString(),
+      'lon': city.longitude.toString(),
       'units': 'metric',
       'lang': 'pt_br',
       'appid': apiKey,
@@ -66,4 +69,70 @@ class WeatherService {
   }
 
   void dispose() => _client.close();
+
+  Future<dynamic> _get(String path, Map<String, String> parameters) async {
+    if (apiKey.trim().isEmpty) {
+      throw const WeatherException(
+        'Configure sua chave OpenWeather para consultar o tempo.',
+      );
+    }
+    try {
+      final response = await _client
+          .get(
+            Uri.https('api.openweathermap.org', path, {
+              ...parameters,
+              'appid': apiKey,
+            }),
+          )
+          .timeout(const Duration(seconds: 12));
+      if (response.statusCode != 200) {
+        throw WeatherException(switch (response.statusCode) {
+          401 => 'Chave OpenWeather inválida ou ainda não ativada.',
+          429 => 'Limite de consultas atingido. Aguarde e tente novamente.',
+          _ => 'Não foi possível consultar o OpenWeather. Tente novamente.',
+        }, statusCode: response.statusCode);
+      }
+      return jsonDecode(utf8.decode(response.bodyBytes));
+    } on WeatherException {
+      rethrow;
+    } on TimeoutException {
+      throw const WeatherException(
+        'A consulta demorou demais. Tente novamente.',
+      );
+    } on http.ClientException {
+      throw const WeatherException('Sem conexão. Confira sua internet.');
+    } on FormatException {
+      throw const WeatherException(
+        'Não foi possível ler a resposta do OpenWeather.',
+      );
+    }
+  }
+
+  Future<List<WeatherCity>> searchCities(String query) async {
+    if (query.trim().isEmpty) return [];
+    final json = await _get('/geo/1.0/direct', {
+      'q': query.trim(),
+      'limit': '5',
+    });
+    try {
+      return (json as List)
+          .map((entry) => WeatherCity.fromJson(entry as Map<String, dynamic>))
+          .toList();
+    } on TypeError {
+      throw const WeatherException('Resposta de cidades incompleta.');
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchForecast(WeatherCity city) async {
+    final json = await _get('/data/2.5/forecast', {
+      'lat': city.latitude.toString(),
+      'lon': city.longitude.toString(),
+      'units': 'metric',
+      'lang': 'pt_br',
+    });
+    if (json is! Map<String, dynamic>) {
+      throw const WeatherException('Resposta de previsão incompleta.');
+    }
+    return json;
+  }
 }

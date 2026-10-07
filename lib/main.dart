@@ -20,7 +20,7 @@ void main() {
         service: WeatherService(
           apiKey: const String.fromEnvironment('OPENWEATHER_API_KEY'),
         ),
-        demo: const bool.fromEnvironment('DEMO_MODE', defaultValue: true),
+        demo: const bool.fromEnvironment('DEMO_MODE'),
       ),
     ),
   );

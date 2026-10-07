@@ -11,12 +11,16 @@ class TodayPage extends StatelessWidget {
     required this.onWeek,
     required this.onDay,
     required this.onRefresh,
+    this.forecast = const [],
+    this.forecastError,
   });
   final String city;
   final CurrentWeather weather;
   final bool demo;
   final VoidCallback onWeek, onRefresh;
   final ValueChanged<ForecastDay> onDay;
+  final List<ForecastDay> forecast;
+  final String? forecastError;
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -58,17 +62,17 @@ class TodayPage extends StatelessWidget {
       const SizedBox(height: 18),
       Row(
         children: [
-          const Expanded(
+          Expanded(
             child: Text(
-              'Próximos 7 dias',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 17),
+              demo ? 'Próximos 7 dias' : 'Próximos dias',
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 17),
             ),
           ),
           TextButton(onPressed: onWeek, child: const Text('Ver todos')),
         ],
       ),
-      if (demo)
-        ...ForecastDay.demo
+      if (demo || forecast.isNotEmpty)
+        ...(demo ? ForecastDay.demo : forecast)
             .take(2)
             .map(
               (day) => ForecastRow(
@@ -78,9 +82,34 @@ class TodayPage extends StatelessWidget {
               ),
             )
       else
-        const Caption(
-          'A previsão diária está disponível no modo de demonstração.',
+        Caption(forecastError ?? 'Carregando previsão dos próximos dias…'),
+      if (!demo) ...[
+        const SizedBox(height: 16),
+        Panel(
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Caption('Nascer do sol'),
+                    Text(weather.localTime(weather.sunriseUtc)),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Caption('Pôr do sol'),
+                    Text(weather.localTime(weather.sunsetUtc)),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
+      ],
       const SizedBox(height: 20),
       Caption(demo ? 'PRÉVIA · DADOS ILUSTRATIVOS' : 'Fonte: OpenWeather'),
     ],

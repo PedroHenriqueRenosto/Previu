@@ -7,17 +7,21 @@ class WeekPage extends StatelessWidget {
     required this.city,
     required this.demo,
     required this.onDay,
+    this.forecast = const [],
+    this.error,
   });
   final String city;
   final bool demo;
   final ValueChanged<ForecastDay> onDay;
+  final List<ForecastDay> forecast;
+  final String? error;
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      const Text(
-        'Próximos 7 dias',
-        style: TextStyle(fontSize: 26, fontWeight: FontWeight.w700),
+      Text(
+        demo ? 'Próximos 7 dias' : 'Próximos dias',
+        style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700),
       ),
       const SizedBox(height: 8),
       Row(
@@ -28,7 +32,14 @@ class WeekPage extends StatelessWidget {
         ],
       ),
       const SizedBox(height: 12),
-      const Panel(padding: 10, child: Caption('Hoje + os próximos 6 dias')),
+      Panel(
+        padding: 10,
+        child: Caption(
+          demo
+              ? 'Hoje + os próximos 6 dias'
+              : 'Previsão disponível para as próximas 120 horas',
+        ),
+      ),
       const SizedBox(height: 20),
       const Row(
         children: [
@@ -38,8 +49,8 @@ class WeekPage extends StatelessWidget {
         ],
       ),
       const SizedBox(height: 8),
-      if (demo)
-        ...ForecastDay.demo.map(
+      if (demo || forecast.isNotEmpty)
+        ...(demo ? ForecastDay.demo : forecast).map(
           (day) => ForecastRow(
             day: day,
             selected: day == ForecastDay.demo.first,
@@ -47,11 +58,9 @@ class WeekPage extends StatelessWidget {
           ),
         )
       else
-        const Padding(
+        Padding(
           padding: EdgeInsets.symmetric(vertical: 40),
-          child: Caption(
-            'A integração de previsão diária ainda não está configurada. Use a prévia do layout no VS Code para explorar esta tela.',
-          ),
+          child: Caption(error ?? 'Carregando previsão dos próximos dias…'),
         ),
       const SizedBox(height: 20),
       const Text(
@@ -60,6 +69,10 @@ class WeekPage extends StatelessWidget {
         style: TextStyle(fontSize: 12, color: muted),
       ),
       if (demo) const Center(child: Caption('Previsão de demonstração')),
+      if (!demo)
+        const Caption(
+          'Fonte: OpenWeather · previsão de 5 dias em intervalos de 3 horas. As mínimas e máximas resumem os horários disponíveis; o primeiro e o último dia podem estar incompletos.',
+        ),
     ],
   );
 }

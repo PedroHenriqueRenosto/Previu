@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../weather/data/weather_repository.dart';
+import '../weather/data/weather_service.dart';
+import '../weather/domain/weather_city.dart';
 import '../weather/domain/current_weather.dart';
 import 'ui.dart';
 import 'pages/welcome_page.dart';
@@ -32,12 +34,15 @@ class _PreviuFlowState extends State<PreviuFlow> {
   PreviuScreen screen = PreviuScreen.welcome;
   PreviuScreen previous = PreviuScreen.welcome;
   String city = 'Curitiba, PR';
+  WeatherCity selectedCity = WeatherCity.curitiba;
+  List<ForecastDay> forecast = [];
+  String? forecastError;
   CurrentWeather? weather;
   String? error;
   ForecastDay day = ForecastDay.demo[1];
   int request = 0;
   void go(PreviuScreen next) {
-    request++;
+    if (screen == PreviuScreen.loading) request++;
     setState(() {
       previous = screen;
       screen = next;
@@ -54,35 +59,59 @@ class _PreviuFlowState extends State<PreviuFlow> {
       if (widget.repository.demo) {
         await Future<void>.delayed(const Duration(milliseconds: 650));
       }
-      final value = await widget.repository.current(refresh: refresh);
+      final value = await widget.repository.current(
+        refresh: refresh,
+        city: selectedCity,
+      );
       if (mounted && id == request) {
         setState(() {
           weather = value;
           screen = PreviuScreen.today;
         });
       }
+      if (!widget.repository.demo) {
+        try {
+          final data = await widget.repository.service.fetchForecast(
+            selectedCity,
+          );
+          final days = ForecastDay.fromOpenWeather(data);
+          if (mounted && id == request) {
+            setState(() {
+              forecast = days;
+              forecastError = days.isEmpty
+                  ? 'Previsão indisponível neste momento.'
+                  : null;
+            });
+          }
+        } catch (_) {
+          if (mounted && id == request) {
+            setState(() {
+              forecastError =
+                  'Não foi possível atualizar a previsão. Atualize o tempo para tentar novamente.';
+            });
+          }
+        }
+      }
     } catch (e) {
       if (mounted && id == request) {
         setState(() {
-          error = 'Confira sua conexão e a configuração do serviço de clima.';
+          error = e is WeatherException
+              ? e.message
+              : 'Confira sua conexão e a configuração do serviço de clima.';
           screen = PreviuScreen.offline;
         });
       }
     }
   }
 
-  void select(String value) {
-    if (!widget.repository.demo && value != 'Curitiba, PR') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'A consulta real está configurada para Curitiba. As outras cidades estão disponíveis na demonstração.',
-          ),
-        ),
-      );
-      return;
+  void select(WeatherCity value) {
+    if (selectedCity.cacheKey != value.cacheKey) {
+      weather = null;
+      forecast = [];
+      forecastError = null;
     }
-    city = value;
+    selectedCity = value;
+    city = value.label;
     load();
   }
 
@@ -95,7 +124,7 @@ class _PreviuFlowState extends State<PreviuFlow> {
           ),
         ),
       );
-      select('Curitiba, PR');
+      select(WeatherCity.curitiba);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -116,7 +145,7 @@ class _PreviuFlowState extends State<PreviuFlow> {
   void back() => go(
     screen == PreviuScreen.detail
         ? PreviuScreen.week
-        : previous == PreviuScreen.welcome
+        : previous == PreviuScreen.welcome || weather == null
         ? PreviuScreen.welcome
         : PreviuScreen.today,
   );
@@ -144,20 +173,29 @@ class _PreviuFlowState extends State<PreviuFlow> {
       ),
       PreviuScreen.today => TodayPage(
         city: city,
-        weather: weather ?? CurrentWeather.preview(),
+        weather: weather!,
         demo: widget.repository.demo,
         onWeek: () => go(PreviuScreen.week),
         onDay: detail,
         onRefresh: () => load(refresh: true),
+        forecast: forecast,
+        forecastError: forecastError,
       ),
       PreviuScreen.week => WeekPage(
         city: city,
         demo: widget.repository.demo,
         onDay: detail,
+        forecast: forecast,
+        error: forecastError,
       ),
-      PreviuScreen.detail => DayDetailPage(day: day, city: city),
+      PreviuScreen.detail => DayDetailPage(
+        day: day,
+        city: city,
+        demo: widget.repository.demo,
+      ),
       PreviuScreen.search => SearchCityPage(
         key: const ValueKey('search'),
+        service: widget.repository.demo ? null : widget.repository.service,
         onSelect: select,
         onLocation: location,
       ),
@@ -256,12 +294,18 @@ class _PreviuFlowState extends State<PreviuFlow> {
                 ],
               ),
         body: SafeArea(
-          child: welcome
-              ? content
-              : SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
-                  child: content,
-                ),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 760),
+              child: welcome
+                  ? content
+                  : SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
+                      child: content,
+                    ),
+            ),
+          ),
         ),
         bottomNavigationBar: welcome
             ? null

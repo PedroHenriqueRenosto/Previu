@@ -13,6 +13,8 @@ class CurrentWeather {
     this.visibility,
     this.sunriseUtc,
     this.sunsetUtc,
+    this.minimum,
+    this.maximum,
   });
 
   final double temperature;
@@ -28,6 +30,7 @@ class CurrentWeather {
   final double? visibility;
   final DateTime? sunriseUtc;
   final DateTime? sunsetUtc;
+  final double? minimum, maximum;
 
   factory CurrentWeather.fromJson(Map<String, dynamic> json) {
     final main = json['main'] as Map<String, dynamic>;
@@ -40,6 +43,8 @@ class CurrentWeather {
     return CurrentWeather(
       temperature: (main['temp'] as num).toDouble(),
       feelsLike: (main['feels_like'] as num).toDouble(),
+      minimum: (main['temp_min'] as num?)?.toDouble(),
+      maximum: (main['temp_max'] as num?)?.toDouble(),
       description: condition['description'] as String? ?? 'Não informado',
       conditionId: (condition['id'] as num?)?.toInt() ?? 0,
       isNight: (condition['icon'] as String? ?? '').endsWith('n'),

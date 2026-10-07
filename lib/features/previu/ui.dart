@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../weather/presentation/widgets/weather_icon.dart';
 export '../weather/presentation/widgets/weather_icon.dart';
+import '../weather/domain/forecast_day.dart';
+export '../weather/domain/forecast_day.dart';
 
 const ink = Color(0xFF27292C);
 const muted = Color(0xFF757A82);
@@ -52,28 +54,6 @@ class LocationButton extends StatelessWidget {
           icon: const Icon(Icons.my_location, size: 18),
           label: const Text('Usar minha localização'),
         );
-}
-
-class ForecastDay {
-  const ForecastDay(
-    this.name,
-    this.date,
-    this.condition,
-    this.rain,
-    this.min,
-    this.max,
-  );
-  final String name, date;
-  final int condition, rain, min, max;
-  static const demo = [
-    ForecastDay('Hoje', 'Qua, 30 set', 802, 40, 18, 27),
-    ForecastDay('Amanhã', 'Qui, 01 out', 500, 70, 17, 26),
-    ForecastDay('Sexta', '02 out', 803, 56, 18, 24),
-    ForecastDay('Sábado', '03 out', 800, 10, 16, 28),
-    ForecastDay('Domingo', '04 out', 800, 10, 18, 29),
-    ForecastDay('Segunda', '05 out', 802, 28, 19, 27),
-    ForecastDay('Terça', '06 out', 500, 80, 17, 23),
-  ];
 }
 
 class ForecastRow extends StatelessWidget {

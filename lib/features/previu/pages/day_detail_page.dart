@@ -2,31 +2,42 @@ import 'package:flutter/material.dart';
 import '../ui.dart';
 
 class DayDetailPage extends StatelessWidget {
-  const DayDetailPage({super.key, required this.day, required this.city});
+  const DayDetailPage({
+    super.key,
+    required this.day,
+    required this.city,
+    this.demo = true,
+  });
   final ForecastDay day;
   final String city;
+  final bool demo;
   @override
   Widget build(BuildContext context) {
     final rain = day.condition < 600;
-    final periods = [
-      ('Manhã', day.min),
-      ('Dia', day.max - 2),
-      ('Tarde', day.max - 4),
-      ('Noite', day.min + 2),
-    ];
+    final periods = demo
+        ? [
+            ('Manhã', day.min),
+            ('Dia', day.max - 2),
+            ('Tarde', day.max - 4),
+            ('Noite', day.min + 2),
+          ]
+        : day.periods.map((p) => (p.label, p.temperature.round())).toList();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          day.name == 'Amanhã' ? 'Quinta-feira' : day.name,
+          demo && day.name == 'Amanhã' ? 'Quinta-feira' : day.name,
           style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700),
         ),
         Caption('${day.date} · $city'),
         const SizedBox(height: 20),
         TemperatureCard(
           detail: true,
-          temperature: '${day.max - 2}°',
-          description: rain ? 'Chuva leve' : 'Parcialmente nublado',
+          temperature:
+              '${demo ? day.max - 2 : day.temperature?.round() ?? day.max}°',
+          description: demo
+              ? (rain ? 'Chuva leve' : 'Parcialmente nublado')
+              : day.description ?? 'Não informado',
           condition: day.condition,
           subtitle: 'Mín. ${day.min}° · Máx. ${day.max}°',
         ),
@@ -66,35 +77,48 @@ class DayDetailPage extends StatelessWidget {
               .toList(),
         ),
         const SizedBox(height: 16),
-        Metrics(rain: true, humidity: '${day.rain}%', wind: '16 km/h'),
-        const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            border: Border.all(color: line),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: const Row(
-            children: [
-              Icon(Icons.wb_twilight_outlined, size: 24),
-              SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [Caption('Nascer do sol'), Text('06:02')],
-                ),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [Caption('Pôr do sol'), Text('18:20')],
-                ),
-              ),
-            ],
-          ),
+        Metrics(
+          rain: true,
+          humidity: '${day.rain}%',
+          wind: demo
+              ? '16 km/h'
+              : day.wind == null
+              ? '—'
+              : '${(day.wind! * 3.6).round()} km/h',
         ),
+        const SizedBox(height: 16),
+        if (demo)
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              border: Border.all(color: line),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.wb_twilight_outlined, size: 24),
+                SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [Caption('Nascer do sol'), Text('06:02')],
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [Caption('Pôr do sol'), Text('18:20')],
+                  ),
+                ),
+              ],
+            ),
+          ),
         const SizedBox(height: 20),
-        const Caption('Dados de demonstração'),
+        Caption(
+          demo
+              ? 'Dados de demonstração'
+              : 'Fonte: OpenWeather · horários disponíveis na previsão. Os horários solares atuais estão na tela Hoje.',
+        ),
       ],
     );
   }
