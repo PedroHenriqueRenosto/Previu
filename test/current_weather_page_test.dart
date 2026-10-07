@@ -30,6 +30,10 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Usar minha localização'));
+    await tester.tap(find.text('Usar minha localização'));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
     expect(find.text('24°'), findsOneWidget);
     expect(find.text('PRÉVIA · DADOS ILUSTRATIVOS'), findsOneWidget);
     await tester.drag(
@@ -55,6 +59,11 @@ void main() {
         ),
       );
       await tester.pumpWidget(PreviuApp(repository: repository));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Buscar cidade'));
+      await tester.tap(find.text('Buscar cidade'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Curitiba, PR'));
       await tester.pumpAndSettle();
       expect(find.text('Tentar novamente'), findsOneWidget);
       expect(find.text('24°'), findsNothing);

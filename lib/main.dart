@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 
 import 'features/weather/data/weather_repository.dart';
 import 'features/weather/data/weather_service.dart';
-import 'features/weather/presentation/current_weather_page.dart';
+import 'features/previu/previu_flow.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,21 +20,24 @@ void main() {
         service: WeatherService(
           apiKey: const String.fromEnvironment('OPENWEATHER_API_KEY'),
         ),
-        demo: const bool.fromEnvironment('DEMO_MODE'),
+        demo: const bool.fromEnvironment('DEMO_MODE', defaultValue: true),
       ),
     ),
   );
 }
 
 class PreviuApp extends StatelessWidget {
-  const PreviuApp({super.key, required this.repository});
+  const PreviuApp({
+    super.key,
+    required this.repository,
+  });
 
   final WeatherRepository repository;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Previu • Hoje',
+      title: 'Previu',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
@@ -46,7 +49,7 @@ class PreviuApp extends StatelessWidget {
           onSurface: Color(0xFF27292C),
           outline: Color(0xFFDDE0E4),
         ),
-        scaffoldBackgroundColor: const Color(0xFFEFF0F2),
+        scaffoldBackgroundColor: Colors.white,
         fontFamily: 'Roboto',
         textTheme: ThemeData.light().textTheme.apply(
           bodyColor: const Color(0xFF27292C),
@@ -68,7 +71,7 @@ class PreviuApp extends StatelessWidget {
           ),
         ),
       ),
-      home: CurrentWeatherPage(repository: repository),
+      home: PreviuFlow(repository: repository),
     );
   }
 }
