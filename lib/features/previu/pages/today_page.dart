@@ -112,6 +112,8 @@ class TodayPage extends StatelessWidget {
       ],
       const SizedBox(height: 20),
       Caption(demo ? 'PRÉVIA · DADOS ILUSTRATIVOS' : 'Fonte: OpenWeather'),
+      if (!demo) const Caption('Atualização automática a cada 5 minutos enquanto esta tela estiver aberta. O horário acima corresponde à medição recebida da API.'),
+      if (forecast.isNotEmpty && forecastError != null) Caption(forecastError!),
     ],
   );
 }

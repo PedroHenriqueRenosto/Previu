@@ -41,7 +41,7 @@ class WeatherService {
       if (response.statusCode != 200) {
         throw WeatherException(switch (response.statusCode) {
           400 => 'Não foi possível consultar esta localidade.',
-          401 => 'O serviço de clima não autorizou a consulta.',
+          401 => 'A chave OpenWeather foi recusada. Confira se ela está ativa em env/local.json e reinicie o aplicativo.',
           404 => 'Localidade não encontrada.',
           429 => 'Muitas consultas por agora. Aguarde um pouco para atualizar.',
           _ =>

@@ -40,6 +40,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('7 dias'));
       await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Amanhã'));
       await tester.tap(find.text('Amanhã'));
       await tester.pumpAndSettle();
       expect(find.text('Quinta-feira'), findsOneWidget);

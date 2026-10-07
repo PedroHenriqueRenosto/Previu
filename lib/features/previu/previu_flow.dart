@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../weather/data/weather_repository.dart';
 import '../weather/data/weather_service.dart';
@@ -41,6 +42,17 @@ class _PreviuFlowState extends State<PreviuFlow> {
   String? error;
   ForecastDay day = ForecastDay.demo[1];
   int request = 0;
+  Timer? refreshTimer;
+  bool busy = false;
+  @override
+  void initState() {
+    super.initState();
+    if (!widget.repository.demo) {
+      refreshTimer = Timer.periodic(const Duration(minutes: 5), (_) {
+        if (!busy && weather != null && screen == PreviuScreen.today) { load(refresh: true, silent: true); }
+      });
+    }
+  }
   void go(PreviuScreen next) {
     if (screen == PreviuScreen.loading) request++;
     setState(() {
@@ -49,10 +61,11 @@ class _PreviuFlowState extends State<PreviuFlow> {
     });
   }
 
-  Future<void> load({bool refresh = false}) async {
+  Future<void> load({bool refresh = false, bool silent = false}) async {
+    busy = true;
     final id = ++request;
     setState(() {
-      screen = PreviuScreen.loading;
+      if (!silent) screen = PreviuScreen.loading;
       error = null;
     });
     try {
@@ -66,7 +79,7 @@ class _PreviuFlowState extends State<PreviuFlow> {
       if (mounted && id == request) {
         setState(() {
           weather = value;
-          screen = PreviuScreen.today;
+          if (!silent) screen = PreviuScreen.today;
         });
       }
       if (!widget.repository.demo) {
@@ -101,7 +114,7 @@ class _PreviuFlowState extends State<PreviuFlow> {
           screen = PreviuScreen.offline;
         });
       }
-    }
+    } finally { if (mounted && id == request) busy = false; }
   }
 
   void select(WeatherCity value) {
@@ -151,6 +164,7 @@ class _PreviuFlowState extends State<PreviuFlow> {
   );
   @override
   void dispose() {
+    refreshTimer?.cancel();
     request++;
     widget.repository.dispose();
     super.dispose();

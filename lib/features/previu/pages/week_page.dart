@@ -69,6 +69,7 @@ class WeekPage extends StatelessWidget {
         style: TextStyle(fontSize: 12, color: muted),
       ),
       if (demo) const Center(child: Caption('Previsão de demonstração')),
+      if (forecast.isNotEmpty && error != null) Caption(error!),
       if (!demo)
         const Caption(
           'Fonte: OpenWeather · previsão de 5 dias em intervalos de 3 horas. As mínimas e máximas resumem os horários disponíveis; o primeiro e o último dia podem estar incompletos.',

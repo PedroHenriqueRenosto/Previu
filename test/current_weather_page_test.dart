@@ -50,7 +50,9 @@ void main() {
       final repository = WeatherRepository(
         service: WeatherService(
           apiKey: 'test-key',
-          client: MockClient((_) async {
+          client: MockClient((request) async {
+            if (request.url.path == '/geo/1.0/direct') { return http.Response(jsonEncode([{'name': 'Curitiba', 'state': 'PR', 'country': 'BR', 'lat': -25.43, 'lon': -49.27}]), 200); }
+            if (request.url.path == '/data/2.5/forecast') { return http.Response('', 503); }
             calls++;
             return calls == 2
                 ? http.Response(jsonEncode(responseData()), 200)
@@ -62,6 +64,9 @@ void main() {
       await tester.pumpAndSettle();
       await tester.ensureVisible(find.text('Buscar cidade'));
       await tester.tap(find.text('Buscar cidade'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'Curitiba');
+      await tester.pump(const Duration(seconds: 1));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Curitiba, PR'));
       await tester.pumpAndSettle();
