@@ -54,7 +54,10 @@ class _PreviuFlowState extends State<PreviuFlow> {
     }
   }
   void go(PreviuScreen next) {
-    if (screen == PreviuScreen.loading) request++;
+    if (screen == PreviuScreen.loading) {
+      request++;
+      busy = false;
+    }
     setState(() {
       previous = screen;
       screen = next;
@@ -76,6 +79,7 @@ class _PreviuFlowState extends State<PreviuFlow> {
         refresh: refresh,
         city: selectedCity,
       );
+      if (!mounted || id != request) return;
       if (mounted && id == request) {
         setState(() {
           weather = value;
@@ -111,7 +115,9 @@ class _PreviuFlowState extends State<PreviuFlow> {
           error = e is WeatherException
               ? e.message
               : 'Confira sua conexão e a configuração do serviço de clima.';
-          screen = PreviuScreen.offline;
+          if (!silent || screen == PreviuScreen.today) {
+            screen = PreviuScreen.offline;
+          }
         });
       }
     } finally { if (mounted && id == request) busy = false; }
@@ -339,16 +345,16 @@ class _PreviuFlowState extends State<PreviuFlow> {
                       go(index == 1 ? PreviuScreen.week : PreviuScreen.search);
                     }
                   },
-                  destinations: const [
-                    NavigationDestination(
+                  destinations: [
+                    const NavigationDestination(
                       icon: Icon(Icons.light_mode_outlined),
                       label: 'Hoje',
                     ),
                     NavigationDestination(
-                      icon: Icon(Icons.calendar_month_outlined),
-                      label: '7 dias',
+                      icon: const Icon(Icons.calendar_month_outlined),
+                      label: widget.repository.demo ? '7 dias' : 'Próximos dias',
                     ),
-                    NavigationDestination(
+                    const NavigationDestination(
                       icon: Icon(Icons.location_on_outlined),
                       label: 'Cidades',
                     ),
