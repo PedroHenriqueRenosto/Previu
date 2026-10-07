@@ -185,8 +185,9 @@ class TemperatureCard extends StatelessWidget {
     this.condition = 802,
     this.detail = false,
     this.subtitle = 'Sensação 25° · Mín. 18° · Máx. 27°',
+    this.updated = '09:40',
   });
-  final String temperature, description, subtitle;
+  final String temperature, description, subtitle, updated;
   final int condition;
   final bool detail;
   @override
@@ -220,7 +221,7 @@ class TemperatureCard extends StatelessWidget {
         ),
         const SizedBox(height: 5),
         Caption(subtitle),
-        if (!detail) const Caption('Atualizado às 09:40'),
+        if (!detail) Caption('Atualizado às $updated'),
       ],
     ),
   );

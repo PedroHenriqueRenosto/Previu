@@ -38,12 +38,13 @@ class TodayPage extends StatelessWidget {
           ),
         ],
       ),
-      const Caption('Quarta-feira, 30 de setembro'),
+      Caption(demo ? 'Quarta-feira, 30 de setembro' : _weatherDate(weather)),
       const SizedBox(height: 20),
       TemperatureCard(
         temperature: '${weather.temperature.round()}°',
         description: weather.description,
         condition: weather.conditionId,
+        updated: demo ? '09:40' : weather.localTime(weather.updatedAtUtc),
         subtitle:
             'Sensação ${weather.feelsLike.round()}°${demo ? ' · Mín. 18° · Máx. 27°' : ''}',
       ),
@@ -84,4 +85,34 @@ class TodayPage extends StatelessWidget {
       Caption(demo ? 'PRÉVIA · DADOS ILUSTRATIVOS' : 'Fonte: OpenWeather'),
     ],
   );
+}
+
+String _weatherDate(CurrentWeather weather) {
+  final date = weather.updatedAtUtc.add(
+    Duration(seconds: weather.utcOffsetSeconds),
+  );
+  const days = [
+    'Segunda-feira',
+    'Terça-feira',
+    'Quarta-feira',
+    'Quinta-feira',
+    'Sexta-feira',
+    'Sábado',
+    'Domingo',
+  ];
+  const months = [
+    'janeiro',
+    'fevereiro',
+    'março',
+    'abril',
+    'maio',
+    'junho',
+    'julho',
+    'agosto',
+    'setembro',
+    'outubro',
+    'novembro',
+    'dezembro',
+  ];
+  return '${days[date.weekday - 1]}, ${date.day} de ${months[date.month - 1]}';
 }

@@ -1,58 +1,48 @@
 # Previu
 
-Início do aplicativo de previsão do tempo em Flutter, baseado no wireframe e na documentação do projeto.
+Aplicativo Flutter com as oito telas das referências, fundo branco e navegação funcional. A interface ocupa toda a janela, sem moldura de celular, bordas externas cinza ou barra de status simulada. No celular, o teclado e as barras do sistema são nativos.
 
-## Esta primeira etapa
+## Abrir no VS Code
 
-- Tela **Hoje** com Curitiba, PR como localidade fixa, seguindo o novo wireframe em tons de cinza.
-- Cabeçalho compacto, cartão de temperatura e ícones de contorno desenhados localmente.
-- Cartões de umidade e vento em km/h; pressão, visibilidade e horários solares em **Mais detalhes de hoje**.
-- Consulta real à Current Weather API, atualização manual e cache em memória por 10 minutos.
-- Carregamento com blocos de espera, erro com nova tentativa e cartão dos últimos dados se a atualização falhar.
-- Layout para celular; na web em telas maiores, a interface permanece centralizada.
-- Navegação **Hoje / 7 dias / Cidades**. Busca e previsão de sete dias aparecem como indisponíveis nesta etapa. Ainda não há GPS, consulta One Call, detalhes diários, boas-vindas ou cache persistente.
-
-## Executar
-
-Requer Flutter 3.44.4 / Dart 3.12.2 ou versões compatíveis.
+Abra esta pasta. Em Executar e Depurar, selecione **Previu · prévia do layout (Edge)** e pressione **F5**. O modo de demonstração também é o padrão ao executar sem parâmetros.
 
 ```sh
 flutter pub get
-flutter run -d edge --dart-define-from-file=env/local.json
-```
-
-A chave fornecida está configurada em `env/local.json`, ignorado pelo Git. Em outra máquina, copie `env/example.json` para `env/local.json` e preencha `OPENWEATHER_API_KEY`.
-
-O Edge está disponível nesta máquina. No VS Code, abra esta pasta, escolha **Previu · tempo real (Edge)** em **Executar e Depurar** e pressione F5.
-
-Para Android, inicie um emulador ou conecte um aparelho, consulte `flutter devices` e substitua `edge` pelo ID. A estrutura de iOS está incluída, mas sua compilação requer macOS e Xcode. Esta primeira etapa não inclui a plataforma Windows desktop; execute no navegador ou em Android/iOS.
-
-Para visualizar o layout sem chamadas à API:
-
-```sh
 flutter run -d edge --dart-define=DEMO_MODE=true
 ```
 
-Esse modo exibe **PRÉVIA · DADOS ILUSTRATIVOS**. No modo real, uma falha nunca é substituída silenciosamente por dados inventados. As configurações de execução também estão disponíveis no VS Code.
+## As oito páginas
 
-As duas linhas de previsão do wireframe são mostradas apenas nesse modo ilustrativo. A execução com a API real mostra **Em breve** até a integração da previsão diária.
+Os arquivos ficam em `lib/features/previu/pages/`:
 
-## Organização
+1. `welcome_page.dart`: boas-vindas, localização e busca.
+2. `today_page.dart`: tempo atual, umidade, vento e resumo dos próximos dias.
+3. `week_page.dart`: previsão dos sete dias; toque em um dia para abrir detalhes.
+4. `search_city_page.dart`: busca de cidades com teclado nativo e seleção.
+5. `day_detail_page.dart`: temperaturas ao longo do dia, chuva, vento e horários solares.
+6. `loading_page.dart`: estrutura de espera durante o carregamento.
+7. `offline_page.dart`: erro, nova tentativa e últimos dados da sessão.
+8. `city_not_found_page.dart`: busca sem resultados, limpar busca e localização.
 
-```text
-lib/
-  main.dart
-  features/weather/
-    domain/current_weather.dart
-    data/weather_service.dart
-    data/weather_repository.dart
-    presentation/current_weather_page.dart
-    presentation/widgets/weather_icon.dart
+`previu_flow.dart` controla navegação, consulta e estados. `ui.dart` reúne cartões, botões, linhas de previsão e cores. Os ícones meteorológicos são desenhados localmente em `lib/features/weather/presentation/widgets/weather_icon.dart`.
+
+## Explorar
+
+Da tela inicial, escolha **Buscar cidade** ou **Usar minha localização**. Use as abas **Hoje**, **7 dias** e **Cidades**. Em **7 dias**, toque em uma linha. Procure `Abcxyz` para abrir Cidade não encontrada. O botão de três pontos no cabeçalho da demonstração permite abrir qualquer uma das oito telas, inclusive Carregando e Sem conexão. Carregando aberto pelo menu permanece visível para inspeção; use uma aba para sair.
+
+## Dados de demonstração e integração real
+
+A demonstração reproduz os valores e datas das imagens. A busca filtra uma lista local de cidades e aceita nomes sem acentos. A localização usa Curitiba na demonstração e informa isso ao usuário; GPS não está integrado. A previsão diária e os detalhes são ilustrativos.
+
+A integração existente com OpenWeather foi preservada: consulta real para Curitiba, atualização, tratamento de falhas e cache em memória de dez minutos. Para usar, selecione **Previu · tempo real (Edge)** no VS Code. Essa configuração utiliza a chave em `env/local.json`, ignorada pelo Git, e desativa explicitamente a demonstração.
+
+```sh
+flutter run -d edge --dart-define-from-file=env/local.json --dart-define=DEMO_MODE=false
 ```
 
-O serviço monta a URL HTTPS, faz o GET e converte erros em mensagens. O modelo preserva valores ausentes e números sem arredondamento. O repositório controla o cache da sessão. A tela converte vento e visibilidade apenas na apresentação. Os horários atuais usam o deslocamento UTC fornecido pela API, sem depender do fuso do aparelho.
+No modo real, a interface não apresenta previsão diária inventada. A busca de outras cidades e GPS ainda precisam de integração. Em outra máquina, configure uma chave em `env/local.json` conforme `env/example.json`. Não publique a chave.
 
-## Verificação
+## Verificar
 
 ```sh
 flutter analyze
@@ -60,10 +50,4 @@ flutter test
 flutter build web --dart-define=DEMO_MODE=true
 ```
 
-Os testes cobrem leitura de números e campos ausentes, horários locais, requisições, falha de autenticação sem repetição automática, cache após falha, recuperação da tela e layout estreito com texto ampliado.
-
-## Chave e integração
-
-O arquivo local evita versionar a chave; `dart-define` não esconde credenciais dentro de um aplicativo distribuído. Antes da publicação, a integração deve passar por um backend, conforme a documentação. Esta etapa consulta somente `/data/2.5/weather`, sem utilizar o produto One Call.
-
-Referências: [Current Weather / OpenWeather](https://openweathermap.org/api/current) e [requisições HTTP no Flutter](https://docs.flutter.dev/cookbook/networking/fetch-data).
+Os testes verificam consulta e cache, recuperação após falha, navegação da busca até detalhes, limpeza de busca sem resultados, preenchimento da janela com fundo branco e layout de 320 pixels com texto ampliado.

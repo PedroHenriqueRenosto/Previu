@@ -201,11 +201,13 @@ class _PreviuFlowState extends State<PreviuFlow> {
                     else
                       const WeatherIcon(size: 24),
                     const SizedBox(width: 10),
-                    const Text(
-                      'Previu',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 20,
+                    const Flexible(
+                      child: Text(
+                        'Previu',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 20,
+                        ),
                       ),
                     ),
                   ],

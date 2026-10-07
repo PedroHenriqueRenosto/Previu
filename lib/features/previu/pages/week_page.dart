@@ -24,7 +24,7 @@ class WeekPage extends StatelessWidget {
         children: [
           const Icon(Icons.location_on_outlined, size: 16),
           const SizedBox(width: 4),
-          Caption(city),
+          Expanded(child: Caption(city)),
         ],
       ),
       const SizedBox(height: 12),
@@ -33,9 +33,8 @@ class WeekPage extends StatelessWidget {
       const Row(
         children: [
           Expanded(child: Caption('DIA')),
-          Caption('CHUVA'),
-          SizedBox(width: 35),
-          Caption('MÍN. / MÁX.'),
+          Expanded(child: Caption('CHUVA')),
+          Expanded(child: Caption('MÍN. / MÁX.')),
         ],
       ),
       const SizedBox(height: 8),

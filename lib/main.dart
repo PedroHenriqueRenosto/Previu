@@ -27,10 +27,7 @@ void main() {
 }
 
 class PreviuApp extends StatelessWidget {
-  const PreviuApp({
-    super.key,
-    required this.repository,
-  });
+  const PreviuApp({super.key, required this.repository});
 
   final WeatherRepository repository;
 
