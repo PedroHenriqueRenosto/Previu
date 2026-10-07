@@ -8,7 +8,8 @@ class WeatherCity {
   });
   final String name, state, country;
   final double latitude, longitude;
-  String get label => state.isEmpty ? '$name, $country' : '$name, $state';
+  String get label => [name, state.isEmpty ? country : state]
+      .where((part) => part.isNotEmpty).join(', ');
   String get cacheKey => '$latitude,$longitude';
   static const curitiba = WeatherCity(
     name: 'Curitiba',

@@ -123,6 +123,21 @@ class WeatherService {
     }
   }
 
+  Future<WeatherCity> cityAt(double latitude, double longitude) async {
+    final json = await _get('/geo/1.0/reverse', {
+      'lat': latitude.toString(),
+      'lon': longitude.toString(),
+      'limit': '1',
+    });
+    if (json is! List || json.isEmpty) {
+      return WeatherCity(name: 'Minha localização', country: '',
+          latitude: latitude, longitude: longitude);
+    }
+    final city = WeatherCity.fromJson(json.first as Map<String, dynamic>);
+    return WeatherCity(name: city.name, state: city.state, country: city.country,
+        latitude: latitude, longitude: longitude);
+  }
+
   Future<Map<String, dynamic>> fetchForecast(WeatherCity city) async {
     final json = await _get('/data/2.5/forecast', {
       'lat': city.latitude.toString(),

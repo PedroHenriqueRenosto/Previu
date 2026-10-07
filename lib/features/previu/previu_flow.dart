@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../weather/data/weather_repository.dart';
 import '../weather/data/weather_service.dart';
+import '../weather/data/device_location_service.dart';
 import '../weather/domain/weather_city.dart';
 import '../weather/domain/current_weather.dart';
 import 'ui.dart';
@@ -134,25 +135,43 @@ class _PreviuFlowState extends State<PreviuFlow> {
     load();
   }
 
-  void location() {
+  Future<void> location() async {
     if (widget.repository.demo) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Demonstração: usando Curitiba. O GPS ainda não está conectado.',
+            'Demonstração: usando Curitiba.',
           ),
         ),
       );
       select(WeatherCity.curitiba);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'A localização do dispositivo ainda não está integrada. Busque Curitiba para consultar o tempo real.',
-          ),
-        ),
-      );
-      go(PreviuScreen.search);
+      final id = ++request;
+      busy = true;
+      setState(() => screen = PreviuScreen.loading);
+      try {
+        final position = await DeviceLocationService().current();
+        if (!mounted || id != request) return;
+        var value = WeatherCity(name: 'Minha localização', country: '',
+            latitude: position.latitude, longitude: position.longitude);
+        try {
+          value = await widget.repository.service.cityAt(
+              position.latitude, position.longitude);
+        } catch (_) {
+          // Weather can still be requested if the city name is unavailable.
+        }
+        if (!mounted || id != request) return;
+        select(value);
+      } catch (e) {
+        if (!mounted || id != request) return;
+        busy = false;
+        go(PreviuScreen.search);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(e is WeatherException ? e.message :
+              'Não foi possível obter sua localização. Tente buscar uma cidade.'),
+          duration: const Duration(seconds: 8),
+        ));
+      }
     }
   }
 

@@ -28,7 +28,9 @@ O modo real é o padrão. Nenhuma falha da API é substituída por previsão de 
 
 Os oito arquivos ficam em `lib/features/previu/pages/`: boas-vindas, hoje, próximos dias, busca de cidade, detalhes do dia, carregando, sem conexão e cidade não encontrada.
 
-Na tela inicial, escolha Buscar cidade. Digite o nome, selecione o resultado e consulte o tempo. Use as abas Hoje, Próximos dias e Cidades. Toque em um dia da previsão para ver seus detalhes. A localização do dispositivo ainda não está integrada; esse botão informa a limitação e abre a busca no modo real.
+Na tela inicial, escolha Usar minha localização e permita o acesso para consultar o tempo nas coordenadas do dispositivo. O nome da cidade é identificado pelo OpenWeather, sem substituir suas coordenadas pelas do centro da cidade. A localização é consultada ao tocar no botão, sem rastreamento em segundo plano. Se a permissão for negada ou o GPS estiver desligado, a busca manual continua disponível.
+
+Para consultar outras cidades, escolha Buscar cidade, digite o nome e selecione um resultado. Use as abas Hoje, Próximos dias e Cidades. Toque em um dia da previsão para ver seus detalhes. No navegador, a localização requer HTTPS ou localhost; depois de adicionar o plugin, pare a execução anterior e reinicie com F5.
 
 `previu_flow.dart` controla navegação e estados, `ui.dart` reúne componentes e `features/weather/` contém modelos, serviço HTTP e cache.
 
