@@ -132,7 +132,7 @@ class _PreviuFlowState extends State<PreviuFlow> {
     }
     selectedCity = value;
     city = value.label;
-    load();
+    load(refresh: true);
   }
 
   Future<void> location() async {
@@ -219,6 +219,7 @@ class _PreviuFlowState extends State<PreviuFlow> {
         onRefresh: () => load(refresh: true),
         forecast: forecast,
         forecastError: forecastError,
+        onChangeCity: () => go(PreviuScreen.search),
       ),
       PreviuScreen.week => WeekPage(
         city: city,
@@ -231,6 +232,8 @@ class _PreviuFlowState extends State<PreviuFlow> {
         day: day,
         city: city,
         demo: widget.repository.demo,
+        currentWeather: !widget.repository.demo && day.name == 'Hoje' ? weather : null,
+        onChangeCity: () => go(PreviuScreen.search),
       ),
       PreviuScreen.search => SearchCityPage(
         key: const ValueKey('search'),

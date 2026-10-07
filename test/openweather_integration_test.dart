@@ -9,12 +9,42 @@ import 'package:previu/features/weather/domain/forecast_day.dart';
 import 'weather_test.dart' show responseData;
 
 void main() {
+  test('Brazilian city names without accents are prioritized and deduplicated', () async {
+    final queries = <String>[];
+    final service = WeatherService(apiKey: 'test-key', client: MockClient((request) async {
+      final query = request.url.queryParameters['q']!;
+      queries.add(query);
+      final brazil = {'name': 'Concórdia', 'state': 'Santa Catarina',
+        'country': 'BR', 'lat': -27.23, 'lon': -52.02};
+      return http.Response(jsonEncode(query.endsWith(',BR') ? [brazil] : [
+        {'name': 'Concordia', 'country': 'AR', 'lat': -31.39, 'lon': -58.02}, brazil,
+      ]), 200, headers: {'content-type': 'application/json; charset=utf-8'});
+    }));
+    addTearDown(service.dispose);
+    final cities = await service.searchCities('Concordia');
+    expect(queries, ['Concordia,BR', 'Concordia']);
+    expect(cities.length, 2);
+    expect(cities.first.name, 'Concórdia');
+  });
+
+  test('Brazilian state suffix is filtered locally instead of sent as a country', () async {
+    final service = WeatherService(apiKey: 'test-key', client: MockClient((request) async {
+      expect(request.url.queryParameters['q'], 'Concordia,BR');
+      return http.Response(jsonEncode([
+        {'name': 'Concórdia', 'state': 'Santa Catarina', 'country': 'BR', 'lat': -27.23, 'lon': -52.02},
+        {'name': 'Concórdia', 'state': 'Bahia', 'country': 'BR', 'lat': -12.0, 'lon': -40.0},
+      ]), 200, headers: {'content-type': 'application/json; charset=utf-8'});
+    }));
+    addTearDown(service.dispose);
+    expect((await service.searchCities('Concordia,SC')).single.state, 'Santa Catarina');
+  });
   test('reverse geocoding preserves device coordinates', () async {
     final service = WeatherService(apiKey: 'test-key', client: MockClient((request) async {
       expect(request.url.path, '/geo/1.0/reverse');
       expect(request.url.queryParameters['lat'], '-27.6123');
       return http.Response(jsonEncode([{'name': 'Florianópolis', 'lat': -27.59,
-        'lon': -48.55, 'state': 'SC', 'country': 'BR'}]), 200, encoding: utf8);
+        'lon': -48.55, 'state': 'SC', 'country': 'BR'}]), 200,
+        headers: {'content-type': 'application/json; charset=utf-8'});
     }));
     addTearDown(service.dispose);
     final city = await service.cityAt(-27.6123, -48.5123);
@@ -35,8 +65,9 @@ void main() {
     var currentCalls = 0;
     final service = WeatherService(apiKey: 'test-key', client: MockClient((request) async {
       if (request.url.path == '/geo/1.0/direct') {
-        expect(request.url.queryParameters['q'], 'Florianópolis');
-        return http.Response(jsonEncode([{'name':'Florianópolis', 'lat':-27.59, 'lon':-48.55, 'state':'SC', 'country':'BR'}]), 200, encoding: utf8);
+        expect(request.url.queryParameters['q'], anyOf('Florianópolis', 'Florianópolis,BR'));
+        return http.Response(jsonEncode([{'name':'Florianópolis', 'lat':-27.59, 'lon':-48.55, 'state':'SC', 'country':'BR'}]), 200,
+          headers: {'content-type': 'application/json; charset=utf-8'});
       }
       currentCalls++;
       final json = responseData();
@@ -71,6 +102,8 @@ void main() {
     expect(days.first.periods.single.label,'Noite');
     expect(days.last.periods.map((p)=>p.label), ['Manhã','Dia']);
     expect(days.last.wind,2.5);
+    expect(days.last.forecastHour, 12);
+    expect(days.last.periods.map((p) => p.hour), [9, 12]);
   });
 
   test('empty geocoding results are distinct from authentication failures', () async {

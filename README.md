@@ -30,7 +30,7 @@ Os oito arquivos ficam em `lib/features/previu/pages/`: boas-vindas, hoje, próx
 
 Na tela inicial, escolha Usar minha localização e permita o acesso para consultar o tempo nas coordenadas do dispositivo. O nome da cidade é identificado pelo OpenWeather, sem substituir suas coordenadas pelas do centro da cidade. A localização é consultada ao tocar no botão, sem rastreamento em segundo plano. Se a permissão for negada ou o GPS estiver desligado, a busca manual continua disponível.
 
-Para consultar outras cidades, escolha Buscar cidade, digite o nome e selecione um resultado. Use as abas Hoje, Próximos dias e Cidades. Toque em um dia da previsão para ver seus detalhes. No navegador, a localização requer HTTPS ou localhost; depois de adicionar o plugin, pare a execução anterior e reinicie com F5.
+Para consultar outras cidades, escolha Buscar cidade, digite o nome completo (por exemplo, Concordia ou Joinville, SC) e selecione um resultado. A busca prioriza o Brasil, aceita siglas de estados brasileiros e também permite resultados internacionais. Use as abas Hoje, Próximos dias e Cidades. Toque em um dia da previsão para ver seus detalhes. Os detalhes mostram o horário previsto de cada temperatura; para Hoje, também mostram a medição atual separadamente. No navegador, a localização requer HTTPS ou localhost; depois de adicionar o plugin, pare a execução anterior e reinicie com F5.
 
 `previu_flow.dart` controla navegação e estados, `ui.dart` reúne componentes e `features/weather/` contém modelos, serviço HTTP e cache.
 

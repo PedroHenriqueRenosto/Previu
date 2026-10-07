@@ -162,7 +162,7 @@ class _SearchCityPageState extends State<SearchCityPage> {
             }
           },
           decoration: InputDecoration(
-            hintText: 'Buscar cidade',
+            hintText: 'Cidade ou cidade, UF',
             filled: true,
             fillColor: panel,
             prefixIcon: const Icon(Icons.search, size: 22),
@@ -182,6 +182,12 @@ class _SearchCityPageState extends State<SearchCityPage> {
           ),
         ),
         const SizedBox(height: 14),
+        if (!demo) ...[
+          const Caption('Digite o nome completo, por exemplo: Concordia ou Joinville, SC.'),
+          Align(alignment: Alignment.centerLeft, child: TextButton.icon(
+            onPressed: search, icon: const Icon(Icons.search),
+            label: const Text('Buscar cidade'))),
+        ],
         if (missing)
           CityNotFoundPage(onClear: clear, onLocation: widget.onLocation)
         else ...[

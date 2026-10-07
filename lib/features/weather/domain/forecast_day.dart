@@ -1,7 +1,8 @@
 class ForecastPeriod {
-  const ForecastPeriod(this.label, this.temperature);
+  const ForecastPeriod(this.label, this.temperature, {this.hour});
   final String label;
   final double temperature;
+  final int? hour;
 }
 
 class ForecastDay {
@@ -17,6 +18,7 @@ class ForecastDay {
     this.wind,
     this.periods = const [],
     this.localDate,
+    this.forecastHour,
   });
   final String name, date;
   final int condition, rain, min, max;
@@ -24,6 +26,7 @@ class ForecastDay {
   final double? temperature, wind;
   final List<ForecastPeriod> periods;
   final DateTime? localDate;
+  final int? forecastHour;
   static const demo = [
     ForecastDay('Hoje', 'Qua, 30 set', 802, 40, 18, 27),
     ForecastDay('Amanhã', 'Qui, 01 out', 500, 70, 17, 26),
@@ -114,13 +117,15 @@ class ForecastDay {
                   (e['_hour'] as int) < period.$3,
             )
             .toList();
-        if (slots.isNotEmpty)
+        if (slots.isNotEmpty) {
           periods.add(
             ForecastPeriod(
               period.$1,
               (slots.first['main']['temp'] as num).toDouble(),
+              hour: slots.first['_hour'] as int,
             ),
           );
+        }
       }
       final diff = date.difference(today).inDays;
       return ForecastDay(
@@ -139,6 +144,7 @@ class ForecastDay {
         wind: (representative['wind']?['speed'] as num?)?.toDouble(),
         periods: periods,
         localDate: date,
+        forecastHour: representative['_hour'] as int,
       );
     }).toList();
   }

@@ -110,14 +110,43 @@ class WeatherService {
 
   Future<List<WeatherCity>> searchCities(String query) async {
     if (query.trim().isEmpty) return [];
-    final json = await _get('/geo/1.0/direct', {
-      'q': query.trim(),
-      'limit': '5',
-    });
+    const states = {
+      'AC': 'Acre', 'AL': 'Alagoas', 'AP': 'Amapá', 'AM': 'Amazonas',
+      'BA': 'Bahia', 'CE': 'Ceará', 'DF': 'Distrito Federal',
+      'ES': 'Espírito Santo', 'GO': 'Goiás', 'MA': 'Maranhão',
+      'MT': 'Mato Grosso', 'MS': 'Mato Grosso do Sul', 'MG': 'Minas Gerais',
+      'PA': 'Pará', 'PB': 'Paraíba', 'PR': 'Paraná', 'PE': 'Pernambuco',
+      'PI': 'Piauí', 'RJ': 'Rio de Janeiro', 'RN': 'Rio Grande do Norte',
+      'RS': 'Rio Grande do Sul', 'RO': 'Rondônia', 'RR': 'Roraima',
+      'SC': 'Santa Catarina', 'SP': 'São Paulo', 'SE': 'Sergipe', 'TO': 'Tocantins',
+    };
+    final parts = query.trim().split(',').map((part) => part.trim()).toList();
+    final state = parts.length >= 2 ? states[parts[1].toUpperCase()] : null;
+    final brazilQuery = state != null ? '${parts.first},BR' :
+        parts.length == 1 ? '${parts.first},BR' : parts.join(',');
     try {
-      return (json as List)
+      final brazilJson = await _get('/geo/1.0/direct', {'q': brazilQuery, 'limit': '5'});
+      final brazil = (brazilJson as List)
           .map((entry) => WeatherCity.fromJson(entry as Map<String, dynamic>))
           .toList();
+      if (state != null) {
+        return brazil.where((city) => city.state == state ||
+            city.state.toUpperCase() == parts[1].toUpperCase()).toList();
+      }
+      if (parts.length > 1) return brazil;
+      dynamic globalJson;
+      try {
+        globalJson = await _get('/geo/1.0/direct', {'q': parts.first, 'limit': '5'});
+      } on WeatherException {
+        if (brazil.isNotEmpty) return brazil;
+        rethrow;
+      }
+      final unique = <String, WeatherCity>{};
+      for (final city in [...brazil, ...(globalJson as List)
+          .map((entry) => WeatherCity.fromJson(entry as Map<String, dynamic>))]) {
+        unique.putIfAbsent(city.cacheKey, () => city);
+      }
+      return unique.values.toList();
     } on TypeError {
       throw const WeatherException('Resposta de cidades incompleta.');
     }

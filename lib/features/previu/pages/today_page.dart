@@ -13,6 +13,7 @@ class TodayPage extends StatelessWidget {
     required this.onRefresh,
     this.forecast = const [],
     this.forecastError,
+    this.onChangeCity,
   });
   final String city;
   final CurrentWeather weather;
@@ -21,6 +22,7 @@ class TodayPage extends StatelessWidget {
   final ValueChanged<ForecastDay> onDay;
   final List<ForecastDay> forecast;
   final String? forecastError;
+  final VoidCallback? onChangeCity;
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -43,6 +45,10 @@ class TodayPage extends StatelessWidget {
         ],
       ),
       Caption(demo ? 'Quarta-feira, 30 de setembro' : _weatherDate(weather)),
+      if (onChangeCity != null)
+        Align(alignment: Alignment.centerLeft, child: TextButton.icon(
+          onPressed: onChangeCity, icon: const Icon(Icons.search),
+          label: const Text('Buscar outra cidade'))),
       const SizedBox(height: 20),
       TemperatureCard(
         temperature: '${weather.temperature.round()}°',

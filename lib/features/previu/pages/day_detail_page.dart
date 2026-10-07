@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../ui.dart';
+import '../../weather/domain/current_weather.dart';
 
 class DayDetailPage extends StatelessWidget {
   const DayDetailPage({
@@ -7,10 +8,14 @@ class DayDetailPage extends StatelessWidget {
     required this.day,
     required this.city,
     this.demo = true,
+    this.currentWeather,
+    this.onChangeCity,
   });
   final ForecastDay day;
   final String city;
   final bool demo;
+  final CurrentWeather? currentWeather;
+  final VoidCallback? onChangeCity;
   @override
   Widget build(BuildContext context) {
     final rain = day.condition < 600;
@@ -21,16 +26,33 @@ class DayDetailPage extends StatelessWidget {
             ('Tarde', day.max - 4),
             ('Noite', day.min + 2),
           ]
-        : day.periods.map((p) => (p.label, p.temperature.round())).toList();
+        : day.periods.map((p) => (
+            p.hour == null ? p.label : '${p.hour.toString().padLeft(2, '0')}:00',
+            p.temperature.round())).toList();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          demo && day.name == 'Amanhã' ? 'Quinta-feira' : day.name,
+          demo && day.name == 'Amanhã' ? 'Quinta-feira' :
+              demo ? day.name : 'Previsão · ${day.name}',
           style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700),
         ),
         Caption('${day.date} · $city'),
+        if (onChangeCity != null)
+          Align(alignment: Alignment.centerLeft, child: TextButton.icon(
+            onPressed: onChangeCity, icon: const Icon(Icons.search),
+            label: const Text('Buscar outra cidade'))),
         const SizedBox(height: 20),
+        if (currentWeather != null) ...[
+          TemperatureCard(
+            temperature: '${currentWeather!.temperature.round()}°',
+            description: currentWeather!.description,
+            condition: currentWeather!.conditionId,
+            updated: currentWeather!.localTime(currentWeather!.updatedAtUtc),
+            subtitle: 'Sensação ${currentWeather!.feelsLike.round()}°',
+          ),
+          const SizedBox(height: 16),
+        ],
         TemperatureCard(
           detail: true,
           temperature:
@@ -39,7 +61,9 @@ class DayDetailPage extends StatelessWidget {
               ? (rain ? 'Chuva leve' : 'Parcialmente nublado')
               : day.description ?? 'Não informado',
           condition: day.condition,
-          subtitle: 'Mín. ${day.min}° · Máx. ${day.max}°',
+          subtitle: '${!demo && day.forecastHour != null ?
+              'Previsto para ${day.forecastHour.toString().padLeft(2, '0')}:00 · ' : ''}'
+              'Mín. ${day.min}° · Máx. ${day.max}°',
         ),
         const SizedBox(height: 24),
         const Text(
@@ -117,7 +141,7 @@ class DayDetailPage extends StatelessWidget {
         Caption(
           demo
               ? 'Dados de demonstração'
-              : 'Fonte: OpenWeather · horários disponíveis na previsão. Os horários solares atuais estão na tela Hoje.',
+              : 'Fonte: OpenWeather · temperaturas e chuva previstas para os horários disponíveis. A chance de chuva é a maior entre esses horários; as mínimas e máximas podem cobrir apenas parte do dia.',
         ),
       ],
     );
