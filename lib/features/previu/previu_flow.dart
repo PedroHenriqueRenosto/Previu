@@ -263,12 +263,12 @@ class _PreviuFlowState extends State<PreviuFlow> {
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: bgTop,
         appBar: welcome
             ? null
             : AppBar(
-                backgroundColor: Colors.white,
-                surfaceTintColor: Colors.white,
+                backgroundColor: bgTop,
+                surfaceTintColor: bgTop,
                 automaticallyImplyLeading: false,
                 title: Row(
                   children: [
@@ -356,9 +356,9 @@ class _PreviuFlowState extends State<PreviuFlow> {
                   border: Border(top: BorderSide(color: line)),
                 ),
                 child: NavigationBar(
-                  backgroundColor: Colors.white,
-                  surfaceTintColor: Colors.white,
-                  indicatorColor: const Color(0xFFE9EAEC),
+                  backgroundColor: bgTop,
+                  surfaceTintColor: bgTop,
+                  indicatorColor: accentSoft,
                   selectedIndex: selected,
                   onDestinationSelected: (index) {
                     if (index == 0) {

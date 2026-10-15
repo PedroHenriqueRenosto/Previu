@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-/// A small outline icon, drawn locally to match the monochrome wireframe.
+/// A small outline icon, drawn locally using the app's theme colors.
 class WeatherIcon extends StatelessWidget {
   const WeatherIcon({
     super.key,
@@ -19,21 +19,29 @@ class WeatherIcon extends StatelessWidget {
   Widget build(BuildContext context) => ExcludeSemantics(
     child: SizedBox.square(
       dimension: size,
-      child: CustomPaint(painter: _WeatherPainter(conditionId, isNight)),
+      child: CustomPaint(
+        painter: _WeatherPainter(
+          conditionId,
+          isNight,
+          Theme.of(context).colorScheme.primary,
+          Theme.of(context).colorScheme.primaryContainer,
+        ),
+      ),
     ),
   );
 }
 
 class _WeatherPainter extends CustomPainter {
-  const _WeatherPainter(this.code, this.night);
+  const _WeatherPainter(this.code, this.night, this.color, this.fillColor);
   final int code;
   final bool night;
+  final Color color, fillColor;
 
   @override
   void paint(Canvas canvas, Size size) {
     canvas.scale(size.width / 32);
     final pen = Paint()
-      ..color = const Color(0xFF44484E)
+      ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.45
       ..strokeCap = StrokeCap.round
@@ -81,7 +89,7 @@ class _WeatherPainter extends CustomPainter {
         ..cubicTo(10, 6, 22, 6, 24, 15)
         ..cubicTo(31, 14, 32, 24, 25, 24)
         ..close();
-      canvas.drawPath(cloud, Paint()..color = const Color(0xFFF4F4F5));
+      canvas.drawPath(cloud, Paint()..color = fillColor);
       canvas.drawPath(cloud, pen);
     }
     if (rain || snow) {
@@ -97,5 +105,8 @@ class _WeatherPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_WeatherPainter oldDelegate) =>
-      oldDelegate.code != code || oldDelegate.night != night;
+      oldDelegate.code != code ||
+      oldDelegate.night != night ||
+      oldDelegate.color != color ||
+      oldDelegate.fillColor != fillColor;
 }

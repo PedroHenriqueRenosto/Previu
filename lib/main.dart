@@ -4,13 +4,14 @@ import 'package:flutter/services.dart';
 import 'features/weather/data/weather_repository.dart';
 import 'features/weather/data/weather_service.dart';
 import 'features/previu/previu_flow.dart';
+import 'theme/app_colors.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(
     SystemUiOverlayStyle.dark.copyWith(
       statusBarColor: Colors.transparent,
-      systemNavigationBarColor: Colors.white,
+      systemNavigationBarColor: bgTop,
       systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
@@ -39,22 +40,66 @@ class PreviuApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: const ColorScheme.light(
-          primary: Color(0xFF27292C),
+          primary: accentStrong,
           onPrimary: Colors.white,
-          secondary: Color(0xFF696D74),
-          surface: Colors.white,
-          onSurface: Color(0xFF27292C),
-          outline: Color(0xFFDDE0E4),
+          primaryContainer: accentSoft,
+          onPrimaryContainer: accentInk,
+          secondary: accentStrong,
+          onSecondary: Colors.white,
+          secondaryContainer: accentSoft,
+          onSecondaryContainer: accentInk,
+          surface: bgTop,
+          onSurface: ink,
+          onSurfaceVariant: muted,
+          outline: accentStrong,
+          outlineVariant: line,
         ),
-        scaffoldBackgroundColor: Colors.white,
+        scaffoldBackgroundColor: bgTop,
         fontFamily: 'Roboto',
         textTheme: ThemeData.light().textTheme.apply(
-          bodyColor: const Color(0xFF27292C),
-          displayColor: const Color(0xFF27292C),
+          bodyColor: ink,
+          displayColor: ink,
+        ),
+        iconTheme: const IconThemeData(color: accentStrong),
+        appBarTheme: const AppBarTheme(
+          foregroundColor: accentStrong,
+          iconTheme: IconThemeData(color: accentStrong),
+          actionsIconTheme: IconThemeData(color: accentStrong),
+        ),
+        listTileTheme: const ListTileThemeData(iconColor: accentStrong),
+        navigationBarTheme: NavigationBarThemeData(
+          indicatorColor: accentSoft,
+          iconTheme: WidgetStateProperty.resolveWith((states) => IconThemeData(
+            color: states.contains(WidgetState.selected) ? accentStrong : muted,
+          )),
+          labelTextStyle: WidgetStateProperty.resolveWith((states) => TextStyle(
+            color: states.contains(WidgetState.selected) ? accentStrong : muted,
+            fontSize: 12,
+            fontWeight: states.contains(WidgetState.selected)
+                ? FontWeight.w700
+                : FontWeight.w500,
+          )),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          prefixIconColor: accentStrong,
+          suffixIconColor: accentStrong,
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: accentStrong, width: 2),
+          ),
+        ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: accentStrong,
+            side: const BorderSide(color: accentStrong),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
         ),
         filledButtonTheme: FilledButtonThemeData(
           style: FilledButton.styleFrom(
-            backgroundColor: const Color(0xFF27292C),
+            backgroundColor: accent,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
             shape: RoundedRectangleBorder(

@@ -1,23 +1,34 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_colors.dart';
+export '../../theme/app_colors.dart';
 import '../weather/presentation/widgets/weather_icon.dart';
 export '../weather/presentation/widgets/weather_icon.dart';
 import '../weather/domain/forecast_day.dart';
 export '../weather/domain/forecast_day.dart';
 
-const ink = Color(0xFF27292C);
-const muted = Color(0xFF757A82);
-const panel = Color(0xFFF3F3F4);
-const line = Color(0xFFE3E5E8);
-
 class Panel extends StatelessWidget {
-  const Panel({super.key, required this.child, this.padding = 20});
+  const Panel({
+    super.key,
+    required this.child,
+    this.padding = 20,
+    this.highlighted = false,
+  });
   final Widget child;
   final double padding;
+  final bool highlighted;
   @override
   Widget build(BuildContext context) => Container(
     padding: EdgeInsets.all(padding),
     decoration: BoxDecoration(
       color: panel,
+      gradient: highlighted
+          ? const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [accentSoft, accentBright],
+            )
+          : null,
+      border: Border.all(color: line),
       borderRadius: BorderRadius.circular(16),
     ),
     child: child,
@@ -68,7 +79,7 @@ class ForecastRow extends StatelessWidget {
   final bool selected;
   @override
   Widget build(BuildContext context) => Material(
-    color: selected ? panel : Colors.white,
+    color: selected ? accentSoft : bgTop,
     borderRadius: BorderRadius.circular(12),
     child: InkWell(
       onTap: onTap,
@@ -85,6 +96,7 @@ class ForecastRow extends StatelessWidget {
                   Text(
                     day.name,
                     style: const TextStyle(
+                      color: accentStrong,
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
                     ),
@@ -99,7 +111,7 @@ class ForecastRow extends StatelessWidget {
               child: Text(
                 '${day.rain}%',
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: muted, fontSize: 12),
+                style: const TextStyle(color: accentStrong, fontSize: 12),
               ),
             ),
             Text(
@@ -130,14 +142,18 @@ class Metrics extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, size: 16, color: muted),
+              Icon(icon, size: 16, color: accentStrong),
               const SizedBox(width: 5),
               Flexible(child: Caption(label)),
             ],
           ),
           Text(
             value,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+            style: const TextStyle(
+              color: accentInk,
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),
@@ -172,6 +188,7 @@ class TemperatureCard extends StatelessWidget {
   final bool detail;
   @override
   Widget build(BuildContext context) => Panel(
+    highlighted: true,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -183,6 +200,7 @@ class TemperatureCard extends StatelessWidget {
               child: Text(
                 temperature,
                 style: const TextStyle(
+                  color: accentInk,
                   fontSize: 64,
                   height: 1.15,
                   fontWeight: FontWeight.w700,

@@ -218,7 +218,7 @@ class _SearchCityPageState extends State<SearchCityPage> {
               (city) => Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: Material(
-                  color: Colors.white,
+                  color: bgTop,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                     side: const BorderSide(color: line),
