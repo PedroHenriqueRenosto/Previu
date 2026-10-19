@@ -15,11 +15,14 @@ void main() {
       systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
+
+  const weatherApiKey = 'f2abe19f599a1909254107123426632f';
+
   runApp(
     PreviuApp(
       repository: WeatherRepository(
         service: WeatherService(
-          apiKey: const String.fromEnvironment('OPENWEATHER_API_KEY'),
+          apiKey: weatherApiKey,
         ),
         demo: const bool.fromEnvironment('DEMO_MODE'),
       ),
